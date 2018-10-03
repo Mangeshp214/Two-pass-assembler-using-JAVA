@@ -15,7 +15,7 @@ public class main_class {
 	public static String[][] ST, LT;
 	public static MOT mobj,obj2;
 	public static Boolean mnc_flag = false, inst_flag = false, lab_flag = false;
-	protected static String IntMedCode;
+	protected static String IntMedCode,FinalMcCode;
 
 	public static void main(String[] args) throws IOException{
 		
@@ -26,6 +26,7 @@ public class main_class {
 		LT = new String[20][2];
 		ST = new String[20][2];
 		IntMedCode = "";
+		FinalMcCode = "";
 		
 		for(int i =0 ; i<20 ;i++)
 			for(int j =0; j<2; j++)
@@ -48,24 +49,102 @@ public class main_class {
 			
 		}
 		
-		System.out.println(LC);
+		System.out.println("\n\n----------Intermediate Code----------\n\n" + IntMedCode);
 		
-		System.out.println(PT[2]);
+		String[] IMcode = IntMedCode.split("\\r?\\n");
 		
-		System.out.println(LT[0][0] + "" + LT[0][1]);
-		System.out.println(LT[1][0] + " " + LT[1][1]);
-		System.out.println(LT[2][0] + " " + LT[2][1]);
-		System.out.println(LT[3][0] + " " + LT[3][1]);
-		System.out.println(LT[4][0] + " " + LT[4][1]);
-		System.out.println(ST[0][0] + " " + ST[0][1]);
-		System.out.println(ST[1][0] + " " + ST[1][1]);
-		System.out.println(ST[2][0] + " " + ST[2][1]);
-		System.out.println(ST[3][0] + " " + ST[3][1]);
+		for(String imcode_line : IMcode) {
+			
+			if(imcode_line.equals(IMcode[0])) {}
+			else {
+				//System.out.println(imcode_line);
+				pass2(imcode_line);
+			}
+			
+		}
 		
-		System.out.println("\n\n" + IntMedCode);
+		System.out.println("\n\n----------Final Machine Code----------\n\n" + FinalMcCode);
 
 	}
 	
+	private static void pass2(String imcode_line) {
+		
+		String[] im_code_space = imcode_line.split("\\s+");
+		int addr1 = 0,addr2 = 0;
+
+		if(im_code_space[1].equals("AD") && im_code_space[2].equals("5")) {
+			
+			FinalMcCode = FinalMcCode + im_code_space[4] + " 0 " + im_code_space[6] + "\n";
+			return;
+			
+		}else {
+			FinalMcCode = FinalMcCode + im_code_space[2] + " ";
+		}
+		
+		
+		if(im_code_space[1].equals("IS") && im_code_space[2].equals("0")) {
+			
+			FinalMcCode = FinalMcCode + "0 0\n";
+			return;
+		}
+		if(im_code_space[1].equals("AD") && im_code_space[2].equals("2")) {
+			
+			FinalMcCode = FinalMcCode + "0 0\n";
+			return;
+		}
+		if(im_code_space[3].equals("RG") || im_code_space[3].equals("CC")) {
+			
+			FinalMcCode = FinalMcCode + im_code_space[4] + " ";
+			
+			if(im_code_space[5].equals("C"))
+				FinalMcCode = FinalMcCode + im_code_space[6] + "\n";
+			if(im_code_space[5].equals("S")) {
+				addr1 = get_addr_at_index_in_ST(Integer.parseInt(im_code_space[6]));
+				FinalMcCode = FinalMcCode + addr1 + "\n";
+			}
+			
+			if(im_code_space[5].equals("L")) {
+				addr1 = get_addr_at_index_in_LT(Integer.parseInt(im_code_space[6]));
+				FinalMcCode = FinalMcCode + addr1 + "\n";
+			}
+			
+		}
+		else {
+			
+			FinalMcCode = FinalMcCode + "0 ";
+			
+			if(im_code_space[3].equals("C"))
+				FinalMcCode = FinalMcCode + im_code_space[4] + "\n";
+			if(im_code_space[3].equals("S")) {
+				addr2 = get_addr_at_index_in_ST(Integer.parseInt(im_code_space[4]));
+				FinalMcCode = FinalMcCode + addr2 + "\n";
+			}
+			
+			if(im_code_space[3].equals("L")) {
+				addr2 = get_addr_at_index_in_LT(Integer.parseInt(im_code_space[4]));
+				FinalMcCode = FinalMcCode + addr2 + "\n";
+			}
+			
+		}
+		
+	}
+
+	private static int get_addr_at_index_in_LT(int i) {
+		
+		int addr = 0;
+		addr = Integer.parseInt(LT[i][1]);
+		return addr;
+		
+	}
+
+	private static int get_addr_at_index_in_ST(int i) {
+		
+		int addr = 0;
+		addr = Integer.parseInt(ST[i][1]);
+		return addr;
+		
+	}
+
 	private static void pass1(String ass_code_line, ArrayList<MOT> mot1, HashMap<String, Integer> hm1) {
 		
 		init();
@@ -566,7 +645,7 @@ public class main_class {
 
 	private static String get_file_contents() throws IOException {
 		
-		File file = new File("C:\\Users\\mangesh\\Documents\\JAVA\\ass_code.txt");
+		File file = new File("C:\\Users\\mangesh\\Documents\\JAVA\\ass_code_1.txt");
 		FileInputStream fis = new FileInputStream(file);
 		DataInputStream dis = new DataInputStream(fis);
 
